@@ -1,0 +1,100 @@
+#include <iostream>
+#include <vector>
+
+class TreeNode {
+public:
+    std::string key;
+    std::vector<std::string> value;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(std::string key, std::string violation) : key(key) {
+        value.push_back(violation);
+        left = right = nullptr;
+    }
+};
+
+TreeNode* insert(TreeNode* root, std::string key, std::string violation) {
+    if (root == nullptr) {
+        return new TreeNode(key, violation);
+    }
+    if (key < root->key) {
+        root->left = insert(root->left, key, violation);
+    }
+    else if (key > root->key) {
+        root->right = insert(root->right, key, violation);
+    }
+    else {
+        root->value.push_back(violation);
+    }
+    return root;
+}
+
+void printDatabase(TreeNode* root) {
+    if (root) {
+        printDatabase(root->left);
+        std::cout << "Car Number: " << root->key << ", Violations: ";
+        for (const auto& violation : root->value) {
+            std::cout << violation << " ";
+        }
+        std::cout << std::endl;
+        printDatabase(root->right);
+    }
+}
+
+void printByNumber(TreeNode* root, std::string key) {
+    TreeNode* current = root;
+    while (current) {
+        if (key == current->key) {
+            std::cout << "Car Number: " << current->key << ", Violations: ";
+            for (const auto& violation : current->value) {
+                std::cout << violation << " ";
+            }
+            std::cout << std::endl;
+            return;
+        }
+        else if (key < current->key) {
+            current = current->left;
+        }
+        else {
+            current = current->right;
+        }
+    }
+    std::cout << "Car Number " << key << " not found in the database." << std::endl;
+}
+
+void printByRange(TreeNode* root, std::string start, std::string end) {
+    if (!root) {
+        return;
+    }
+    if (root->key > start) {
+        printByRange(root->left, start, end);
+    }
+    if (start <= root->key && root->key <= end) {
+        std::cout << "Car Number: " << root->key << ", Violations: ";
+        for (const auto& violation : root->value) {
+            std::cout << violation << " ";
+        }
+        std::cout << std::endl;
+    }
+    if (root->key < end) {
+        printByRange(root->right, start, end);
+    }
+}
+
+int main() {
+    TreeNode* root = nullptr;
+    root = insert(root, "ABC123", "Speeding");
+    root = insert(root, "XYZ789", "Parking Violation");
+
+    std::cout << "Full Database:" << std::endl;
+    printDatabase(root);
+
+    std::cout << "\nData for Car Number XYZ789:" << std::endl;
+    printByNumber(root, "XYZ789");
+
+    std::cout << "\nData for Car Numbers in Range A to Z:" << std::endl;
+    printByRange(root, "A", "Z");
+
+    return 0;
+}
